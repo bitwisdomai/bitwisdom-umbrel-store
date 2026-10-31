@@ -1,0 +1,68 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: bitwisdom-usdt-node_web_1
+      APP_PORT: 3004
+
+  init-wallet-password:
+    restart: on-failure
+    image: lightninglabs/lightning-terminal:v0.17.8@sha256:47081b70b74bd47420e6849904e432bb43004e9ec72214a4bfa5790cb119a960
+    user: "1000:1000"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - 'umask 077 && printf "%s" "$$WALLET_PASSWORD" > /data/wallet-password'
+    environment:
+      WALLET_PASSWORD: "${APP_BITWISDOM_USDT_NODE_WALLET_PASSWORD}"
+    volumes:
+      - ${APP_DATA_DIR}/data:/data
+
+  web:
+    image: lightninglabs/lightning-terminal:v0.17.8@sha256:47081b70b74bd47420e6849904e432bb43004e9ec72214a4bfa5790cb119a960
+    user: "1000:1000"
+    restart: on-failure
+    stop_grace_period: 1m
+    depends_on:
+      init-wallet-password:
+        condition: service_completed_successfully
+    ports:
+      - "9740:9735/tcp"
+    volumes:
+      - ${APP_DATA_DIR}/data:/data
+    environment:
+      HOME: "/data"
+      APP_PASSWORD: "${APP_PASSWORD}"
+      LIT_AUTO_MIGRATE_TO_SQL: "true"
+    command:
+      - --uipassword_env=APP_PASSWORD
+      - --insecure-httplisten=0.0.0.0:3004
+      - --httpslisten=0.0.0.0:8443
+      - --network=${APP_BITCOIN_NETWORK}
+      - --lnd-mode=integrated
+      - --taproot-assets-mode=integrated
+      - --pool-mode=disable
+      - --loop-mode=disable
+      - --faraday-mode=disable
+      - --autopilot.disable
+      - --tlsextradomain=bitwisdom-usdt-node_web_1
+      - --lnd.tlsextradomain=bitwisdom-usdt-node_web_1
+      - ${APP_BITWISDOM_USDT_NODE_CHAIN_FLAG}
+      - ${APP_BITWISDOM_USDT_NODE_ORACLE_FLAG}
+      - --lnd.bitcoin.node=bitcoind
+      - --lnd.bitcoind.rpchost=${APP_BITCOIN_NODE_IP}:${APP_BITCOIN_RPC_PORT}
+      - --lnd.bitcoind.rpcuser=${APP_BITCOIN_RPC_USER}
+      - --lnd.bitcoind.rpcpass=${APP_BITCOIN_RPC_PASS}
+      - --lnd.bitcoind.zmqpubrawblock=tcp://${APP_BITCOIN_NODE_IP}:${APP_BITCOIN_ZMQ_RAWBLOCK_PORT}
+      - --lnd.bitcoind.zmqpubrawtx=tcp://${APP_BITCOIN_NODE_IP}:${APP_BITCOIN_ZMQ_RAWTX_PORT}
+      - --lnd.listen=0.0.0.0:9735
+      - --lnd.rpclisten=0.0.0.0:10009
+      - --lnd.restlisten=0.0.0.0:8080
+      - --lnd.wallet-unlock-password-file=/data/wallet-password
+      - --lnd.wallet-unlock-allow-create
+      - --lnd.accept-keysend
+      - --lnd.protocol.option-scid-alias
+      - --lnd.protocol.zero-conf
+      - --lnd.protocol.simple-taproot-chans
+      - --lnd.protocol.simple-taproot-overlay-chans
+      - --lnd.protocol.custom-message=17

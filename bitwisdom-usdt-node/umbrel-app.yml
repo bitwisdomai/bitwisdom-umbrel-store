@@ -1,0 +1,38 @@
+manifestVersion: 1
+id: bitwisdom-usdt-node
+storage:
+  dataRoot: data
+category: bitcoin
+name: BitWisdom USDT Node
+version: "0.17.8"
+tagline: A Lightning node that can hold USDT (Taproot Assets) channels
+description: >-
+  🚨 CRITICAL: This app runs its own NEW Lightning wallet, separate from the Lightning Node app.
+  Uninstalling this app permanently erases its data, including Taproot Assets and Bitcoin funds.
+  Your 24-word seed alone CANNOT restore Taproot Assets. Before uninstalling or reinstalling,
+  you must back up the .tapd data folder and your channel backup.
+  Follow this guide to back up tapd data:
+  https://community.umbrel.com/t/backing-up-taproot-assets-tapd-data-in-lightning-terminal/14360
+
+
+  This app runs Lightning Terminal (litd) in integrated mode so your node can receive USDT over Lightning,
+  for example with the BitWisdom BTCPay plugin. It does not use or change your existing Lightning Node app.
+
+
+  The wallet password is derived from this Umbrel device. If you move the app data to a different Umbrel,
+  restore with your 24-word seed and your tapd backup on a fresh install.
+releaseNotes: >-
+  Before updating a node that already has Taproot Asset (USDT) channels: pause new price quotes and channel opens, stop forwarding payments, and wait for pending payments to settle. Then update. Always back up your tapd data first.
+developer: BitWisdom
+website: https://github.com/bitwisdomai
+dependencies:
+  - bitcoin
+repo: https://github.com/bitwisdomai/bitwisdom-umbrel-store
+support: https://github.com/bitwisdomai/bitwisdom-umbrel-store/issues
+port: 3590
+gallery: []
+path: ""
+defaultUsername: ""
+deterministicPassword: true
+submitter: BitWisdom
+submission: https://github.com/bitwisdomai/bitwisdom-umbrel-store
